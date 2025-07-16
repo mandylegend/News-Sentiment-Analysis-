@@ -1,6 +1,10 @@
+## Note :- if github link does not work please copy and past it in browser 
+
 Explanation :-
 
 ## Github link :- https://github.com/mandylegend/News-Sentiment-Analysis-.git 
+
+ 
 
 ## Important Liabraies :- 
    import requests
@@ -56,7 +60,7 @@ Explanation :-
       2. Then type Streamlit run app.py
 
 ## 5. How to run the app:
-  - i have shared screenshot pdf of tutorial in detail in interface_pdf_guide
+  - I have shared screenshot pdf of tutorial in detail in interface_pdf_guide
 
 
 
