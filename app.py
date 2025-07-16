@@ -39,7 +39,7 @@ def fetch_api(q, page_size=50):
     url = "https://newsapi.org/v2/everything"
     params = {
         "q": q,
-        "apiKey": os.getenv("NEWS_API_KEY", "a19fd3616a004b6da4f52442a4c659bc"),
+        "apiKey": os.getenv("NEWS_API_KEY", "PAST_YOUR_API_KEY"),
         "language": "en",
         "pageSize": page_size,
         "sortBy": "publishedAt",
