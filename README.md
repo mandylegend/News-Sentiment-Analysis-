@@ -1,5 +1,5 @@
 ## Note :- If github link does not work please copy and past it in browser 
-## For security reasons, I've removed my API key from the code. Please paste your own valid API key into the apiKey field to use the application
+## For security reasons, I've removed my News API key from the code. Please paste your own valid API key into the apiKey field to use the application
 
 Explanation :-
 
