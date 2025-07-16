@@ -1,4 +1,4 @@
-## Note :- if github link does not work please copy and past it in browser 
+## Note :- If github link does not work please copy and past it in browser 
 
 Explanation :-
 

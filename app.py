@@ -116,28 +116,28 @@ def zero_shot_sentiment(text, candidate_labels=["Positive", "Negative", "Neutral
     return max(zip(result["labels"], result["scores"]), key=lambda x: x[1])[0]
 
 
-# comment background image if you can't read the words
+# comment out background image 
 # ----------------- Streamlit UI -----------------
 
-def add_bg_from_url(url: str):
-    st.markdown(
-        f"""
-        <style>
-        .stApp {{
-            background-image: url("{url}");
-            background-attachment: fixed;
-            background-size: cover;
-            background-position: center;
-        }}
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
+# def add_bg_from_url(url: str):
+#     st.markdown(
+#         f"""
+#         <style>
+#         .stApp {{
+#             background-image: url("{url}");
+#             background-attachment: fixed;
+#             background-size: cover;
+#             background-position: center;
+#         }}
+#         </style>
+#         """,
+#         unsafe_allow_html=True
+#     )
 
-# Example call
-# Image is randomly sletected from internet
+# # Example call
+# # Image is randomly sletected from internet
 
-add_bg_from_url("https://images.ctfassets.net/ukazlt65o6hl/1X7WqUtjm9T7X74oArKV5o/5549604f598a7b9b6ea9abd704491a99/Customer_Sentiment_Analysis.jpeg")
+# add_bg_from_url("https://images.ctfassets.net/ukazlt65o6hl/1X7WqUtjm9T7X74oArKV5o/5549604f598a7b9b6ea9abd704491a99/Customer_Sentiment_Analysis.jpeg")
 
 
 
