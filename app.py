@@ -154,6 +154,18 @@ model_choice = st.sidebar.selectbox(
     index=0
 )
 
+# Custom CSS for sidebar styling
+# This CSS styles the sidebar with a specific background color and padding
+st.markdown("""
+    <style>
+    [data-testid="stSidebar"] {
+        background-color:#4e5ba0;
+        padding: 1.5rem;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+
 st.sidebar.info(
     "This app analyzes the sentiment of news headlines related to a given company or keyword. "
     "You can choose from four sentiment analysis models: VADER, RoBERTa, TextBlob, ZeroShot and FinBERT."
