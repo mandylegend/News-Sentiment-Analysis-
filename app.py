@@ -1,5 +1,18 @@
+"""
+# Sentiment Analysis of News Headlines
+This app fetches news articles related to a given keyword and analyzes their sentiment using various models.    
+It supports VADER, RoBERTa, TextBlob, FinBERT, and Zero-Shot classification models.
+It provides a user-friendly interface to input a keyword, select a sentiment analysis model, and view the results in a structured format.
+It also includes a sidebar for model selection and information about the models used.   
+This app is built using Streamlit, a Python library for creating web applications for data science and machine learning projects.
+It uses the News API to fetch articles and performs sentiment analysis on the headlines of those articles.  
+This app is designed to help users understand the sentiment of news articles related to specific companies or topics, providing insights into public perception and media coverage.
+It is useful for investors, analysts, and anyone interested in tracking sentiment trends in the news.
+"""
 # ----------------- imports -----------------
-import os, string, requests
+import os
+import string
+import requests
 import pandas as pd
 import nltk
 from nltk.corpus import stopwords
@@ -10,18 +23,18 @@ import altair as alt
 import streamlit as st
 
 
-
 # ----------------- one‑time setup ----------------------------------------------------
 for pkg in ("stopwords", "vader_lexicon"):
     try:
         nltk.data.find(f"corpora/{pkg}")
     except LookupError:
         nltk.download(pkg)
-# stopword 
+# stopword
 stop_words = set(stopwords.words("english"))
 sia = SentimentIntensityAnalyzer()
 
 # ----------------- load models -----------------
+
 
 # cache heavy objects & remote calls
 @st.cache_data(show_spinner=False)
@@ -32,14 +45,14 @@ def get_roberta():
     )
 
 
-# Fetch news articles from News API
-# Uses the News API to fetch articles related to a given keyword
 @st.cache_data(show_spinner=False)
 def fetch_api(q, page_size=50):
+    """Fetches news articles from the News API based on a query."""
+
     url = "https://newsapi.org/v2/everything"
     params = {
         "q": q,
-        "apiKey": os.getenv("NEWS_API_KEY", "PAST_YOUR_API_KEY"),
+        "apiKey": os.getenv("NEWS_API_KEY", "a19fd3616a004b6da4f52442a4c659bc"),
         "language": "en",
         "pageSize": page_size,
         "sortBy": "publishedAt",
@@ -56,22 +69,30 @@ def fetch_api(q, page_size=50):
 # ----------------- helpers -----------------
 # Preprocess text by removing punctuation, converting to lowercase, and filtering stop words
 def preprocess(text: str) -> str:
+    """Preprocesses the input text by removing punctuation, converting to lowercase, and filtering stop words."""
     text = text.translate(str.maketrans("", "", string.punctuation)).lower()
     return " ".join(w for w in text.split() if w not in stop_words)
 
 
 # ----------------- sentiment analysis -----------------
 
-# Sentiment analysis functions for different models
-#
+
 # VADER sentiment analysis
 def vader_sentiment(text):
+    """Analyzes sentiment using VADER.
+    Returns 'Positive', 'Negative', or 'Neutral' based on the compound score.
+    Uses a cached SentimentIntensityAnalyzer for efficiency.
+    """
     score = sia.polarity_scores(text)["compound"]
     return "Positive" if score >= 0.05 else "Negative" if score <= -0.05 else "Neutral"
 
-
 # RoBERTa sentiment analysis
+
+
 def roberta_sentiment(text):
+    """Analyzes sentiment using RoBERTa.
+    Uses a cached RoBERTa pipeline for efficiency.
+    """
     # Using the cached RoBERTa pipeline
     # Returns a dictionary with 'label' and 'score'
     res = get_roberta()(text, truncation=True)[0]
@@ -82,41 +103,57 @@ def roberta_sentiment(text):
         'LABEL_2': 'Positive'
 
     }
-    
+
     return label_map.get(label, "Unknown")  # -> Positive / Negative / Neutral
 
 
 # TextBlob sentiment analysis
+
+
 def textblob_sentiment(text):
+    """Analyzes sentiment using TextBlob.
+    Returns 'Positive', 'Negative', or 'Neutral' based on the polarity score.
+    """
     p = TextBlob(text).sentiment.polarity
     # TextBlob returns a float in the range [-1.0, 1.0]
     # We classify it as Positive, Negative, or Neutral
-    return "Positive" if p > 0 else "Negative" if p < 0 else "Neutral" 
+    return "Positive" if p > 0 else "Negative" if p < 0 else "Neutral"
 
 # FinBERT sentiment analysis
-# Uses the FinBERT model for financial sentiment analysis
+
+
 def get_finbert():
+    """Returns a cached FinBERT pipeline for sentiment analysis.
+    This function uses the ProsusAI/finbert model for financial sentiment analysis.
+    """
     return pipeline(
         "sentiment-analysis",
         model="ProsusAI/finbert"
     )
 
-finbert_map = {"positive": "Positive", "negative": "Negative", "neutral": "Neutral"}
+
+finbert_map = {"positive": "Positive",
+               "negative": "Negative",
+               "neutral": "Neutral"}
 
 # FinBERT sentiment analysis
+
+
 def finbert_sentiment(text):
     res = get_finbert()(text, truncation=True)[0]["label"].lower()
     return finbert_map[res]
 
 
 def zero_shot_sentiment(text, candidate_labels=["Positive", "Negative", "Neutral"]):
+    """Analyzes sentiment using Zero-Shot classification.
+    Uses a cached zero-shot classification pipeline for efficiency."""
     # Uses a zero-shot classification pipeline for sentiment analysis
     classifier = pipeline("zero-shot-classification")
     result = classifier(text, candidate_labels)
     return max(zip(result["labels"], result["scores"]), key=lambda x: x[1])[0]
 
 
-# comment out background image 
+# comment out background image
 # ----------------- Streamlit UI -----------------
 
 # def add_bg_from_url(url: str):
@@ -136,17 +173,14 @@ def zero_shot_sentiment(text, candidate_labels=["Positive", "Negative", "Neutral
 
 # # Example call
 # # Image is randomly sletected from internet
-
 # add_bg_from_url("https://images.ctfassets.net/ukazlt65o6hl/1X7WqUtjm9T7X74oArKV5o/5549604f598a7b9b6ea9abd704491a99/Customer_Sentiment_Analysis.jpeg")
 
 
-
-#--------Streamlit app configuration---------------------------------
-
+# --------Streamlit app configuration---------------------------------
 st.set_page_config("News Sentiment Analyzer", layout="centered", page_icon="📰")
 st.title("📰 News Sentiment Analyzer")
 keyword = st.text_input("Company or keyword", "OpenAI")
-# sidebar 
+
 # Sidebar for model selection
 model_choice = st.sidebar.selectbox(
     "Choose sentiment analysis model",
@@ -174,12 +208,22 @@ st.sidebar.info(
 st.sidebar.progress(100)
 
 
-
 # Uncomment the following line to allow users to choose the model via radio buttons and comment out the selectbox above
 # model_choice = st.radio("Choose model", ("VADER", "RoBERTa", "TextBlob", "FinBERT"))
 
+
 # Button to trigger analysis
 if st.button("Analyze"):
+    """Fetches news articles and analyzes their sentiment based on the selected model.
+    Displays the results in a DataFrame and provides insights into the sentiment distribution.
+    If no articles are found, it displays a warning message.
+    Args:
+        keyword (str): The keyword or company name to search for in news articles.
+        model_choice (str): The sentiment analysis model selected by the user.
+    Returns:
+        None: Displays the results directly in the Streamlit app.   
+
+    """
     with st.spinner("Crunching news …"):
         articles = fetch_api(keyword)
     if not articles:
@@ -188,8 +232,7 @@ if st.button("Analyze"):
         data = []
         for art in articles:
             clean_title = preprocess(art["title"] or "")
-            
-          
+
             sentiment = (
                 # Choose sentiment analysis model based on user selection
                 vader_sentiment(clean_title) if model_choice == "VADER"
@@ -199,16 +242,21 @@ if st.button("Analyze"):
                 else textblob_sentiment(clean_title)
             )
             data.append(
-                {"Headline": art["title"], "Sentiment": sentiment, "Link": art["url"]}
+                {"Headline": art["title"],
+                 "Sentiment": sentiment,
+                 "Link": art["url"]}
             )
         # Create a DataFrame from the collected data
+        """Create a DataFrame from the collected data and display it in the Streamlit app."""
         df = pd.DataFrame(data)
         st.dataframe(df, use_container_width=True)
-        st.text(f"accuracy: {round(df['Sentiment'].value_counts(normalize=True).max() * 100, 2)}%")
+        st.text(
+            f"accuracy: {round(df['Sentiment'].value_counts(normalize=True).max() * 100, 2)}%")
+
         st.markdown("### Sentiment Distribution")
         st.write(f"Total articles: {len(df)}")
         st.write(f"Model used: **{model_choice}**")
-      
+
         # Display a bar chart of sentiment counts
         st.write("Sentiment counts:")
         st.bar_chart(df["Sentiment"].value_counts())
@@ -222,10 +270,10 @@ if st.button("Analyze"):
         }
 
 
-
         st.markdown("### Model Accuracy")
-        st.write("Estimated accuracy of each model based on training data:")    
-        st.write(pd.Series(each_model_accuracy).rename("Accuracy (%)").sort_values(ascending=False))
+        st.write("Estimated accuracy of each model based on training data:")
+        st.write(pd.Series(each_model_accuracy).rename(
+            "Accuracy (%)").sort_values(ascending=False))
         st.markdown("### About the Models")
 
         st.write("""
@@ -234,4 +282,3 @@ if st.button("Analyze"):
                  - **TextBlob**: A simple library for processing textual data, providing a straightforward API for common natural language processing (NLP) tasks.
                  - **FinBERT**: A financial sentiment analysis model that is fine-tuned for financial text.
                  - **Zero-Shot**: A model that can classify text into categories it has not seen during training, using a technique called zero-shot learning.""")
-        
